@@ -1,5 +1,4 @@
 import MapComponent from "@/app/components/MapComponent";
-import useMapsStore from "@/app/stores/map";
 
 const MapView = () => {
   return (

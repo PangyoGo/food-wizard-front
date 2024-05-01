@@ -228,3 +228,12 @@
     transform: rotate(0deg);
   }
 }
+.container {
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: aquamarine;
+ }

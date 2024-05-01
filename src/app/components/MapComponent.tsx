@@ -1,14 +1,40 @@
 "use client";
 import Script from "next/script";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const MapComponent = () => {
-  // const naverClientID = ;
-
   const mapElement = useRef<HTMLDivElement | null>(null);
+  const [curLocation, setCurLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setCurLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      });
+      console.log(position.coords.latitude, position.coords.longitude);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!curLocation) return;
+
+    const location = new naver.maps.LatLng(curLocation.latitude, curLocation.longitude);
+    const mapOptions = {
+      center: location,
+      zoom: 10,
+    };
+
+    const map = new naver.maps.Map(mapElement.current!, mapOptions);
+
+    new naver.maps.Marker({
+      position: location,
+      map: map,
+    });
+  }, [curLocation]);
 
   const initMap = () => {
-    const location = new naver.maps.LatLng(37.3595704, 127.105399);
+    const location =  new naver.maps.LatLng(37.3595704, 127.105399);
     const mapOptions = {
       center: location,
       zoom: 10,
