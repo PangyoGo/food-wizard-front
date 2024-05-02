@@ -4,22 +4,27 @@ import { useEffect, useRef, useState } from "react";
 
 const MapComponent = () => {
   const mapElement = useRef<HTMLDivElement | null>(null);
-  const [curLocation, setCurLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  
+  const [curLocation, setCurLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
       setCurLocation({
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude
+        longitude: position.coords.longitude,
       });
-      console.log(position.coords.latitude, position.coords.longitude);
     });
   }, []);
 
   useEffect(() => {
     if (!curLocation) return;
 
-    const location = new naver.maps.LatLng(curLocation.latitude, curLocation.longitude);
+    const location = new naver.maps.LatLng(
+      curLocation.latitude,
+      curLocation.longitude
+    );
     const mapOptions = {
       center: location,
       zoom: 10,
@@ -34,7 +39,7 @@ const MapComponent = () => {
   }, [curLocation]);
 
   const initMap = () => {
-    const location =  new naver.maps.LatLng(37.3595704, 127.105399);
+    const location = new naver.maps.LatLng(37.3595704, 127.105399);
     const mapOptions = {
       center: location,
       zoom: 10,
