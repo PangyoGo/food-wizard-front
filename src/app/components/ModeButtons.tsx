@@ -43,12 +43,17 @@ const MoodButtons = () => {
 
   const handleGetSerachList = async (param: string) => {
     const apiURL =
-      "v1/search/local.json?query=" + "홍대" + "&display=5&start=1";
+     "v1/search/local.json?"
     const result = await axios.get(apiURL, {
+      params: {
+        query:param,
+        display:5,
+        sort:"random"
+      },
       headers: {
         "Content-Type": "application/json",
-        "X-Naver-Client-Id": process.env.NEXT_PUBLIC_X_NAVER_CLINET_ID,
-        "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_X_SECRET_ID,
+        "X-Naver-Client-Id": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_ID,
+        "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_SECRET,
       },
     });
     console.log(result, "rrr");

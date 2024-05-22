@@ -21,9 +21,12 @@ const MapComponent = () => {
   useEffect(() => {
     if (!curLocation) return;
 
+    const tm128 = new naver.maps.Point(1291042123,  351383896); 
+    const latLng = naver && naver.maps.TransCoord.fromTM128ToLatLng(tm128);
+
     const location = new naver.maps.LatLng(
-      curLocation.latitude,
-      curLocation.longitude
+      latLng.x,// curLocation.latitude,
+      latLng.y//curLocation.longitude
     );
     const mapOptions = {
       center: location,
@@ -58,7 +61,7 @@ const MapComponent = () => {
       <Script
         type="text/javascript"
         src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
-        onReady={() => {
+        onLoad={() => {
           initMap();
         }}
       />
