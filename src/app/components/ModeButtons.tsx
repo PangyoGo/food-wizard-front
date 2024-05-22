@@ -2,12 +2,14 @@
 import axios from "axios";
 import React from "react";
 import { useState } from "react";
+import useMapsStore from "../stores/map";
 
 interface MoodFoods {
   [mood: string]: string[];
 }
 
 const MoodButtons = () => {
+  const { setLocation, resultLocation } = useMapsStore();
   // 기본 기분 상태는 null로 설정
   const [selectedMood, setSelectedMood] = useState<null | string>(null);
   const [recommandFood, setRecommandFood] = useState<null | string>(null);
@@ -43,7 +45,11 @@ const MoodButtons = () => {
 
   const handleGetSerachList = async (param: string) => {
     const apiURL =
+<<<<<<< HEAD
      "v1/search/local.json?"
+=======
+      "v1/search/local.json?query=홍대" + param + "&display=5&start=1";
+>>>>>>> 1839fb4355b72358dbc9a9a6dda54b9aed273bff
     const result = await axios.get(apiURL, {
       params: {
         query:param,
@@ -56,7 +62,10 @@ const MoodButtons = () => {
         "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_SECRET,
       },
     });
-    console.log(result, "rrr");
+    console.log(result.data.items[0], "rrr");
+    const { mapx, mapy } = result.data.items[0];
+    setLocation(mapx, mapy);
+    console.log("mode", resultLocation);
   };
 
   return (
