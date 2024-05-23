@@ -10,7 +10,7 @@ interface MoodFoods {
 
 const MoodButtons = () => {
   const { setLocation, resultLocation } = useMapsStore();
-  // 기본 기분 상태는 null로 설정
+  const { setSelectedMoodFood, selectedMoodFood} = useMapsStore();
   const [selectedMood, setSelectedMood] = useState<null | string>(null);
   const [recommandFood, setRecommandFood] = useState<null | string>(null);
 
@@ -39,34 +39,30 @@ const MoodButtons = () => {
     }
 
     const randomIndex = Math.floor(Math.random() * foods.length);
-    setRecommandFood(foods[randomIndex]);
-    handleGetSerachList(foods[randomIndex]);
+    setSelectedMoodFood(foods[randomIndex]);
+    // handleGetSerachList(foods[randomIndex]);
   };
 
-  const handleGetSerachList = async (param: string) => {
-    const apiURL =
-<<<<<<< HEAD
-     "v1/search/local.json?"
-=======
-      "v1/search/local.json?query=홍대" + param + "&display=5&start=1";
->>>>>>> 1839fb4355b72358dbc9a9a6dda54b9aed273bff
-    const result = await axios.get(apiURL, {
-      params: {
-        query:param,
-        display:5,
-        sort:"random"
-      },
-      headers: {
-        "Content-Type": "application/json",
-        "X-Naver-Client-Id": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_ID,
-        "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_SECRET,
-      },
-    });
-    console.log(result.data.items[0], "rrr");
-    const { mapx, mapy } = result.data.items[0];
-    setLocation(mapx, mapy);
-    console.log("mode", resultLocation);
-  };
+  // const handleGetSerachList = async (param: string) => {
+  //   const apiURL =
+  //     "v1/search/local.json?query=홍대" + param + "&display=5&start=1";
+  //   const result = await axios.get(apiURL, {
+  //     params: {
+  //       query:param,
+  //       display:5,
+  //       sort:"random"
+  //     },
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "X-Naver-Client-Id": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_ID,
+  //       "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_SECRET,
+  //     },
+  //   });
+  //   console.log(result.data.items[0], "rrr");
+  //   const { mapx, mapy } = result.data.items[0];
+  //   setLocation(mapx, mapy);
+  //   console.log("mode", resultLocation);
+  // };
 
   return (
     <div>
@@ -81,7 +77,7 @@ const MoodButtons = () => {
         <button onClick={() => handleMoodSelect("Surprise")}>놀라움</button>
       </div>
       {selectedMood && <p>선택한 기분: {selectedMood}</p>}
-      {recommandFood && <p>추천 음식: {recommandFood}</p>}
+      {selectedMoodFood && <p>추천 음식: {selectedMoodFood}</p>}
     </div>
   );
 };
