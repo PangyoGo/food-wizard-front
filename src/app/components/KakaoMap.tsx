@@ -16,19 +16,19 @@ const KakaoMap = () => {
     longitude: number;
   } | null>(null);
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setCurLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-    });
-  }, []);
-
 
   useEffect(()=>{
     if (map && selectedMoodFood){
-      ps.keywordSearch( selectedMoodFood, placesSearchCB);
+      const location = new kakao.maps.LatLng(
+        curLocation?.latitude,
+         curLocation?.longitude
+       );
+      const options = {
+        location: location,
+        radius: 2000,
+        sort: kakao.maps.services.SortBy.DISTANCE,
+      };
+      ps.keywordSearch( selectedMoodFood, placesSearchCB, options);
     }
 
   },[map,ps, selectedMoodFood])
@@ -50,6 +50,7 @@ const KakaoMap = () => {
       position: location,
       map: map,
     });
+    map.panTo(location);
   }, [curLocation]);
 
     const markers = [];
@@ -78,38 +79,66 @@ const KakaoMap = () => {
       }
   }
 
-    const initMap = () => {   
-        const location = new kakao.maps.LatLng(33.450701, 126.570667)
-        const mapOption = { 
+  const initMap = () => {
+    let location = new kakao.maps.LatLng(33.450701, 126.570667);
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          setCurLocation({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                });
+            location = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            console.log(location);
+
+            const mapOption = {
+                center: location, // 지도의 중심좌표
+                level: 3 // 지도의 확대 레벨
+            };
+
+            const map = new kakao.maps.Map(mapElement.current!, mapOption);
+            const ps = new kakao.maps.services.Places();
+
+            setMap(map);
+            setPs(ps);
+            const infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
+
+            const marker = new kakao.maps.Marker({
+                position: location
+            });
+            marker.setMap(map);
+        });
+    } else {
+        const mapOption = {
             center: location, // 지도의 중심좌표
             level: 3 // 지도의 확대 레벨
         };
-    
-  
-    const map = new kakao.maps.Map(mapElement.current!, mapOption); 
-    const ps = new kakao.maps.services.Places();  
 
-    setMap(map);
-    setPs(ps)
-    const infowindow = new kakao.maps.InfoWindow({zIndex:1});
+        const map = new kakao.maps.Map(mapElement.current!, mapOption);
+        const ps = new kakao.maps.services.Places();
 
-    const marker = new kakao.maps.Marker({
-        position: location
-    });
-    marker.setMap(map);
+        setMap(map);
+        setPs(ps);
+        const infowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
-  
+        const marker = new kakao.maps.Marker({
+            position: location
+        });
+        marker.setMap(map);
     }
+};
+
 
     return (
       <>
         <h1>kakao map</h1>
-<>
+      <>
       <Script
         type="text/javascript"
         src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`}
         onLoad={() => {
             kakao.maps.load(function() {
+              console.log(kakao)
                 // v3가 모두 로드된 후, 이 콜백 함수가 실행됩니다.
                 initMap();
             });
