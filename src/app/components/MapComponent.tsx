@@ -24,13 +24,6 @@ const MapComponent = () => {
 
   useEffect(() => {
     if (!curLocation) return;
-<<<<<<< HEAD
-
-    const tm128 = new naver.maps.Point(1291042123,  351383896); 
-    const latLng = naver && naver.maps.TransCoord.fromTM128ToLatLng(tm128);
-
-=======
->>>>>>> 1839fb4355b72358dbc9a9a6dda54b9aed273bff
     const location = new naver.maps.LatLng(
       latLng.x,// curLocation.latitude,
       latLng.y//curLocation.longitude

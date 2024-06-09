@@ -1,0 +1,14 @@
+
+.mainContainer {
+    margin: 0 auto; /* 수평 중앙 정렬 */
+    padding: 20px; /* 선택적으로 패딩 추가 */
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 120px;
+}
+.btnBox{
+    display: flex;
+    margin-top: 40px;
+}

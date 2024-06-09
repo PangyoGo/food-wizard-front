@@ -14,6 +14,8 @@ const MoodButtons = () => {
   const [selectedMood, setSelectedMood] = useState<null | string>(null);
   const [recommandFood, setRecommandFood] = useState<null | string>(null);
 
+  const moodArr = ['Joy', 'Sadness', 'Anger', 'Anxiety',  'Calm', 'Excitement','Surprise'];
+
   const moodFoods: MoodFoods = {
     Joy: ["피자", "아이스크림", "초밥", "파스타", "햄버거"],
     Sadness: ["죽", "치킨 스프", "초콜릿", "마카로니 치즈", "라면"],
@@ -40,41 +42,22 @@ const MoodButtons = () => {
 
     const randomIndex = Math.floor(Math.random() * foods.length);
     setSelectedMoodFood(foods[randomIndex]);
-    // handleGetSerachList(foods[randomIndex]);
+
+    
   };
 
-  // const handleGetSerachList = async (param: string) => {
-  //   const apiURL =
-  //     "v1/search/local.json?query=홍대" + param + "&display=5&start=1";
-  //   const result = await axios.get(apiURL, {
-  //     params: {
-  //       query:param,
-  //       display:5,
-  //       sort:"random"
-  //     },
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       "X-Naver-Client-Id": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_ID,
-  //       "X-Naver-Client-Secret": process.env.NEXT_PUBLIC_NAVER_SEARCH_CLIENT_SECRET,
-  //     },
-  //   });
-  //   console.log(result.data.items[0], "rrr");
-  //   const { mapx, mapy } = result.data.items[0];
-  //   setLocation(mapx, mapy);
-  //   console.log("mode", resultLocation);
-  // };
+
 
   return (
     <div>
       <h2>기분을 선택하세요:</h2>
       <div>
-        <button onClick={() => handleMoodSelect("Joy")}>기쁨</button>
-        <button onClick={() => handleMoodSelect("Sadness")}>슬픔</button>
-        <button onClick={() => handleMoodSelect("Anger")}>분노</button>
-        <button onClick={() => handleMoodSelect("Anxiety")}>불안</button>
-        <button onClick={() => handleMoodSelect("Calm")}>평온</button>
-        <button onClick={() => handleMoodSelect("Excitement")}>흥분</button>
-        <button onClick={() => handleMoodSelect("Surprise")}>놀라움</button>
+        {moodArr.map((mood) => (
+          <button key={mood} onClick={() => handleMoodSelect(mood)}>
+            {mood}
+          </button>
+        ))}
+       
       </div>
       {selectedMood && <p>선택한 기분: {selectedMood}</p>}
       {selectedMoodFood && <p>추천 음식: {selectedMoodFood}</p>}
