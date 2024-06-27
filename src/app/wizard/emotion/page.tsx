@@ -2,6 +2,7 @@
  
 import { useRouter } from 'next/navigation'
 import { useState } from "react";
+import axios from 'axios'
 
 import styles from './emotion.module.css'
 import Button from '@mui/material/Button';
@@ -23,31 +24,17 @@ const Emotion = () => {
 
     const moodArr = ['Joy', 'Sadness', 'Anger', 'Anxiety',  'Calm', 'Excitement','Surprise'];
 
-    const moodFoods: MoodFoods = {
-        Joy: ["피자", "아이스크림", "초밥", "파스타", "햄버거"],
-        Sadness: ["죽", "치킨 스프", "초콜릿", "마카로니 치즈", "라면"],
-        Anger: ["고추장찌개", "매운닭갈비", "불고기", "마라탕", "카레"],
-        Anxiety: ["녹차", "잡곡밥", "블루베리", "견과류", "요거트"],
-        Calm: ["샐러드", "그라놀라", "스무디", "푸딩", "허니버터칩"],
-        Excitement: [
-          "스테이크",
-          "초콜릿 케이크",
-          "망고 스무디",
-          "불닭볶음면",
-          "타코",
-        ],
-        Surprise: ["타코", "마카롱", "파스텔", "몽블랑", "스시"],
-      };
 
-    const handleMoodSelect = (mood: string) => {
+    const  handleMoodSelect = async (mood: string) => {
         setSelectedMood(mood);
-        const foods = moodFoods[mood];
-        if (!foods) {
+
+        const { data: { data: { food } } } = await axios.get(`/wizard/emotion/api?mood=${mood}`);
+
+        if (!food) {
           return "죄송합니다. 해당 기분에 대한 음식 추천을 찾을 수 없습니다.";
         }
-    
-        const randomIndex = Math.floor(Math.random() * foods.length);
-        setSelectedMoodFood(foods[randomIndex]);
+
+        setSelectedMoodFood(food);
         
         router.push('/wizard/map');
       };

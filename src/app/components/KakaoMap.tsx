@@ -94,11 +94,13 @@ const KakaoMap = () => {
 
   function displayPlaces(places) {
 
-    var listEl = document.getElementById('placesList'), 
+    const listEl = document.getElementById('placesList'), 
     menuEl = document.getElementById('menu_wrap'),
     fragment = document.createDocumentFragment(), 
     bounds = new kakao.maps.LatLngBounds(), 
     listStr = '';
+
+    const markerCnt = places.length > 0 && places.length <= 5 ? placesList.length : 5;
     
     // 검색 결과 목록에 추가된 항목들을 제거합니다
     //removeAllChildNods(listEl);
@@ -106,10 +108,10 @@ const KakaoMap = () => {
     // 지도에 표시되고 있는 마커를 제거합니다
     // removeMarker();
     
-    for ( var i=0; i<6; i++ ) {
+    for ( let i=0; i< markerCnt; i+=1 ) {
 
         // 마커를 생성하고 지도에 표시합니다
-        var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
+        const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
             marker = addMarker(placePosition, i), 
             itemEl = getListItem(i, places[i]); // 검색 결과 항목 Element를 생성합니다
           
@@ -140,7 +142,7 @@ const KakaoMap = () => {
 
         fragment.appendChild(itemEl);
     }
-    console.log(markers, "mar", marker)
+
 
     // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
     listEl.appendChild(fragment);
@@ -263,10 +265,6 @@ function removeAllChildNods(el) {
             setPs(ps);
 
 
-            // const marker = new kakao.maps.Marker({
-            //     position: location
-            // });
-            // marker.setMap(map);
         });
         setIsLoading(false);
     } else {
@@ -282,10 +280,7 @@ function removeAllChildNods(el) {
         setPs(ps);
 
 
-        // const marker = new kakao.maps.Marker({
-        //     position: location
-        // });
-        // marker.setMap(map);
+    
     }
     setIsLoading(false);
 };
