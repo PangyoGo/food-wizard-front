@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import useMapsStore from "../stores/map";
+import { title } from "process";
 
 const KakaoMap = () => {
 
@@ -27,12 +28,13 @@ const KakaoMap = () => {
 
   // const [markers, setMarkers] = useState<any[]>([]);
   let markers = [];
+  let infowindows = [];
   const [infowindow, setInfowindow] = useState<any>(null);
 
   useEffect(() => {
     if (window.kakao && window.kakao.maps) {
       // Kakao Maps API가 이미 로드된 경우
-      initMap();
+      initMap();   
     }
   }, []);
 
@@ -54,35 +56,12 @@ const KakaoMap = () => {
 
   },[curLocation?.latitude, curLocation?.longitude, map, ps, selectedMoodFood])
 
-  // useEffect(() => {
-  //   if (!curLocation) return;
-  //   const location = new kakao.maps.LatLng(
-  //    curLocation.latitude,
-  //     curLocation.longitude
-  //   );
-  //   const mapOptions = {
-  //     center: location,
-  //     zoom: 10,
-  //   };
 
-  //   const map = new kakao.maps.Map(mapElement && mapElement.current!, mapOptions);
-
-  //   // new kakao.maps.Marker({
-  //   //   position: location,
-  //   //   map: map,
-  //   // });
-  //   map.panTo(location);
-  // }, [curLocation]);
-
-   
 
     function placesSearchCB(data, status, pagination) {
       if (status === kakao.maps.services.Status.OK) {
-  
-          // 정상적으로 검색이 완료됐으면
-          // 검색 목록과 마커를 표출합니다
         displayPlaces(data);
-  
+
       } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
           alert('검색 결과가 존재하지 않습니다.');
           return;
@@ -93,66 +72,44 @@ const KakaoMap = () => {
   }
 
   function displayPlaces(places) {
-
     const listEl = document.getElementById('placesList'), 
     menuEl = document.getElementById('menu_wrap'),
     fragment = document.createDocumentFragment(), 
     bounds = new kakao.maps.LatLngBounds(), 
     listStr = '';
-
+    const zIndexBase = 1;
+  
     const markerCnt = places.length > 0 && places.length <= 5 ? placesList.length : 5;
-    
-    // 검색 결과 목록에 추가된 항목들을 제거합니다
-    //removeAllChildNods(listEl);
+  
+    for (let i = 0; i < markerCnt; i++) {
+      const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
+            marker = addMarker(placePosition, i, places[i].place_name, places[i].road_address_name),
+            itemEl = getListItem(i, places[i]); 
+  
+      bounds.extend(placePosition);
+  
+      fragment.appendChild(itemEl);
 
-    // 지도에 표시되고 있는 마커를 제거합니다
-    // removeMarker();
-    
-    for ( let i=0; i< markerCnt; i+=1 ) {
-
-        // 마커를 생성하고 지도에 표시합니다
-        const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
-            marker = addMarker(placePosition, i), 
-            itemEl = getListItem(i, places[i]); // 검색 결과 항목 Element를 생성합니다
-          
-        // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
-        // LatLngBounds 객체에 좌표를 추가합니다
-        bounds.extend(placePosition);
-
-        // 마커와 검색결과 항목에 mouseover 했을때
-        // 해당 장소에 인포윈도우에 장소명을 표시합니다
-        // mouseout 했을 때는 인포윈도우를 닫습니다
-        (function(marker, title) {
-            kakao.maps.event.addListener(marker, 'mouseover', function() {
-                displayInfowindow(marker, title);
-            });
-
-            kakao.maps.event.addListener(marker, 'mouseout', function() {
-                infowindow.close();
-            });
-
-            itemEl.onmouseover =  function () {
-                displayInfowindow(marker, title);
-            };
-
-            itemEl.onmouseout =  function () {
-                infowindow.close();
-            };
-        })(marker, places[i].place_name);
-
-        fragment.appendChild(itemEl);
+      (function(marker, infowindow) {
+        kakao.maps.event.addListener(marker, 'click', function() {
+          // 모든 인포윈도우의 zIndex를 초기화
+          infowindows.forEach(function(iw) {
+            iw.setZIndex(zIndexBase);
+          });
+          // 클릭된 인포윈도우의 zIndex를 가장 높게 설정
+          infowindow.setZIndex(zIndexBase + 1);
+          infowindow.open(map, marker);
+     
+        });
+      })(marker, infowindows[i]);
     }
-
-
-    // 검색결과 항목들을 검색결과 목록 Element에 추가합니다
+  
     listEl.appendChild(fragment);
     menuEl.scrollTop = 0;
-
-    // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+  
     map.setBounds(bounds);
-}
-
-// 검색결과 항목을 Element로 반환하는 함수입니다
+  }
+  
 function getListItem(index, places) {
 
   var el = document.createElement('li'),
@@ -176,8 +133,7 @@ function getListItem(index, places) {
   return el;
 }
 
-// 마커를 생성하고 지도 위에 마커를 표시하는 함수입니다
-function addMarker(position, idx, title) {
+function addMarker(position, idx, title, address) {
   var imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png', // 마커 이미지 url, 스프라이트 이미지를 씁니다
       imageSize = new kakao.maps.Size(36, 37),  // 마커 이미지의 크기
       imgOptions =  {
@@ -193,6 +149,26 @@ function addMarker(position, idx, title) {
 
   marker.setMap(map); // 지도 위에 마커를 표출합니다
   markers.push(marker);  // 배열에 생성된 마커를 추가합니다
+   // 개별 인포윈도우 생성
+  const infowindow = new kakao.maps.InfoWindow({
+      content: '<div style="padding:5px;z-index:1;">' + title + '</div>'
+  });
+  infowindows.push(infowindow);
+
+    // 클릭 이벤트 등록
+    kakao.maps.event.addListener(marker, 'click', function() {
+      infowindows.forEach(function(iw) {
+        iw.setZIndex(1); // 모든 인포윈도우의 zIndex를 초기화
+      });
+   
+      infowindow.setZIndex(2); // 현재 인포윈도우의 zIndex를 가장 높게 설정
+      infowindow.open(map, marker);
+      shareToKakao(title, address);
+    });
+
+
+
+  infowindow.open(map, marker); // 마커와 함께 인포윈도우를 표시
   return marker;
 }
 
@@ -207,7 +183,6 @@ function removeMarker() {
 
 function displayInfowindow(marker, title) {
   var content = '<div style="padding:5px;z-index:1;">' + title + '</div>';
-
   infowindow.setContent(content);
   infowindow.open(map, marker);
 }
@@ -241,6 +216,8 @@ function removeAllChildNods(el) {
   };
 
   const initMap = () => {
+
+    
     let location = new kakao.maps.LatLng(33.450701, 126.570667);
     const infowindowInstance = new kakao.maps.InfoWindow({ zIndex: 1 });
     setInfowindow(infowindowInstance);
@@ -250,7 +227,7 @@ function removeAllChildNods(el) {
           setCurLocation({
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude,
-                });
+          });
             location = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
             const mapOption = {
@@ -260,6 +237,11 @@ function removeAllChildNods(el) {
 
             const map = new kakao.maps.Map(mapElement && mapElement.current!, mapOption);
             const ps = new kakao.maps.services.Places();
+
+            const marker = new kakao.maps.Marker({
+              position: location,
+              map: map,
+            });
 
             setMap(map);
             setPs(ps);
@@ -285,6 +267,51 @@ function removeAllChildNods(el) {
     setIsLoading(false);
 };
 
+function shareToKakao(title: string, address: string) {
+
+  // Kakao.Share.sendDefault({
+  //   objectType: 'text',
+  //   text:
+  //     '기본 템플릿으로 제공되는 텍스트 템플릿은 텍스트를 최대 200자까지 표시할 수 있습니다. 텍스트 템플릿은 텍스트 영역과 하나의 기본 버튼을 가집니다. 임의의 버튼을 설정할 수도 있습니다. 여러 장의 이미지, 프로필 정보 등 보다 확장된 형태의 카카오톡 공유는 다른 템플릿을 이용해 보낼 수 있습니다.',
+  //   link: {
+  //     // [내 애플리케이션] > [플랫폼] 에서 등록한 사이트 도메인과 일치해야 함
+  //     mobileWebUrl:'http://localhost:3000',
+  //     webUrl: 'http://localhost:3000',
+  //   },
+  // });
+  Kakao.Share.createDefaultButton({
+    container: '#kakaotalk-sharing-btn',
+    objectType: 'location',
+    address: address,
+    content: {
+      title: title,
+      description: 'title',
+      imageUrl:
+        'http://k.kakaocdn.net/dn/bSbH9w/btqgegaEDfW/vD9KKV0hEintg6bZT4v4WK/kakaolink40_original.png',
+      link: {
+        mobileWebUrl: 'http://localhost:3000',
+        webUrl: 'http://localhost:3000',
+      },
+    },
+    social: {
+      likeCount: 286,
+      commentCount: 45,
+      sharedCount: 845,
+    },
+    buttons: [
+      {
+        title: '웹으로 보기',
+        link: {
+          mobileWebUrl: 'http://localhost:3000',
+          webUrl: 'http://localhost:3000',
+        },
+      },
+    ],
+  });
+  
+
+}
+
 
     return (
       <>
@@ -292,6 +319,10 @@ function removeAllChildNods(el) {
         <h4>
           {selectedMoodFood && <p>추천 음식: {selectedMoodFood}</p>}
         </h4>
+        <a id="kakaotalk-sharing-btn" href="javascript:shareToKakao()">
+  <img src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_medium.png"
+    alt="카카오톡 공유 보내기 버튼" />
+</a>
         <Script
           type="text/javascript"
           src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false&libraries=services`}
@@ -301,6 +332,16 @@ function removeAllChildNods(el) {
               });
           }}
         />
+
+        <Script
+          type="text/javascript"
+          src={`https://developers.kakao.com/sdk/js/kakao.js`}
+          onLoad={() => {
+            Kakao.init(`${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}`); // 여기에 실제 카카오 앱 키를 넣어주세요.
+            console.log(Kakao.isInitialized())
+          }}
+        />
+    
         {isLoading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', position:'relative'}}>
           <CircularProgress color="secondary" />
